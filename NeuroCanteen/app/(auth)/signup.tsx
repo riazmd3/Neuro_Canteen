@@ -1,10 +1,9 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useState } from 'react';
 
 export default function SignUpScreen() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     employeeId: '',
@@ -16,6 +15,11 @@ export default function SignUpScreen() {
   const handleSignUp = () => {
     // Sign up logic will be implemented later
     console.log('Sign up attempted with:', formData);
+  };
+
+  const handleBack = () => {
+    // This ensures we go back to the home screen
+    router.replace('/');
   };
 
   return (
@@ -30,7 +34,7 @@ export default function SignUpScreen() {
       >
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
         >
           <ArrowLeft color="#0F5132" size={24} />
         </TouchableOpacity>

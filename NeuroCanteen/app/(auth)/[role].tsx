@@ -1,10 +1,9 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useState } from 'react';
 
 export default function LoginScreen() {
-  const router = useRouter();
   const { role } = useLocalSearchParams();
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +11,11 @@ export default function LoginScreen() {
   const handleLogin = () => {
     // Login logic will be implemented later
     console.log('Login attempted with:', { employeeId, password });
+  };
+
+  const handleBack = () => {
+    // This ensures we go back to the home screen
+    router.replace('/');
   };
 
   return (
@@ -26,7 +30,7 @@ export default function LoginScreen() {
       >
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
         >
           <ArrowLeft color="#0F5132" size={24} />
         </TouchableOpacity>
