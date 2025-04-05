@@ -1,20 +1,56 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams, router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useState } from 'react';
 
+const API_URL = 'http://127.0.0.1:8142'; // Update this with your actual backend URL
+
 export default function LoginScreen() {
   const { role } = useLocalSearchParams();
-  const [employeeId, setEmployeeId] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Login logic will be implemented later
-    console.log('Login attempted with:', { employeeId, password });
+  const handleLogin = async () => {
+    if (role !== 'admin') {
+      Alert.alert('Not Implemented', 'Only admin login is currently implemented');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/authenticate/admin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+      
+      const data = await response.json();
+      console.log({data})
+      if (response.ok && data.jwt) {
+        // Store the JWT token securely
+        // Note: In a production app, use secure storage
+        localStorage.setItem('jwtToken', data.jwt);
+        
+        // Navigate to admin dashboard
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Login Failed', 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', 'Failed to connect to the server');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
-    // This ensures we go back to the home screen
     router.replace('/');
   };
 
@@ -40,26 +76,15 @@ export default function LoginScreen() {
           <Text style={styles.subtitle}>Committed to Neuro Sciences</Text>
         </View>
 
-        <View style={styles.tabs}>
-          <TouchableOpacity style={styles.tabActive}>
-            <Text style={styles.tabTextActive}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.tab}
-            onPress={() => router.push('/(auth)/signup')}
-          >
-            <Text style={styles.tabText}>Sign up</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Employee ID</Text>
+            <Text style={styles.label}>Username</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your ID"
-              value={employeeId}
-              onChangeText={setEmployeeId}
+              placeholder="Enter your username"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
             />
           </View>
 
@@ -81,17 +106,14 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity 
-            style={styles.loginButton}
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.loginButtonText}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Text>
           </TouchableOpacity>
-
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -132,33 +154,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     color: '#374151',
   },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  tabActive: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: '#0F5132',
-  },
-  tabText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  tabTextActive: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 16,
-    color: '#0F5132',
-  },
   form: {
     padding: 24,
   },
@@ -195,25 +190,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
+  loginButtonDisabled: {
+    backgroundColor: '#0F5132AA',
+  },
   loginButtonText: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: 16,
     color: '#FFFFFF',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E7EB',
-  },
-  dividerText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: '#6B7280',
-    marginHorizontal: 16,
   },
 });

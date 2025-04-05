@@ -28,7 +28,6 @@ export default function HomeScreen() {
         />
         {/* <Text style={styles.title}>Neuro Foundation</Text>
         <Text style={styles.subtitle}>Committed to Neuro Sciences</Text> */}
-        {/* <Srinivasn></Srinivasn> */}
       </View>
 
       <View style={styles.rolesGrid}>
